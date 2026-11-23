@@ -62,6 +62,17 @@ nav button{flex:1;border:0;background:none;cursor:pointer;font-size:10px;color:v
 nav button span{display:block;font-size:18px;filter:grayscale(1);opacity:.6}
 nav button.on{color:var(--ink)}nav button.on span{filter:none;opacity:1}
 .foot{font-size:11px;color:#8fb0a8;margin-top:18px}
+.ai{margin-top:14px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--mint);border-radius:14px;padding:11px 12px}
+.ai h4{margin:0 0 6px;font-size:12px;color:var(--ink);display:flex;justify-content:space-between;align-items:center}
+.ai h4 em{font-style:normal;font-size:9px;font-weight:700;background:#d4f3e6;color:#12724f;border-radius:99px;padding:3px 7px}
+.ai .res{font-size:13px;color:var(--ink);margin-bottom:8px}
+.ai .res b{font-size:16px}
+.bar{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mut);margin:3px 0}
+.bar span:first-child{width:38px}.bar .meter{flex:1;height:6px}.bar span:last-child{width:30px;text-align:right}
+.ai .why{font-size:10px;color:var(--mut);margin-top:7px;line-height:1.4}
+.ai .why i{font-style:normal;background:#eef5f2;border-radius:6px;padding:1px 5px;margin-right:3px;color:var(--ink)}
+.ai .btn{margin-top:9px;padding:9px;font-size:12px}
+.ai .nt{font-size:9px;color:#8aa39e;margin-top:7px;line-height:1.35}
 </style>
 </head>
 <body>
@@ -104,11 +115,19 @@ nav button.on{color:var(--ink)}nav button.on span{filter:none;opacity:1}
   <label for="rs">Riesgo que previene</label>
   <select id="rs"><option>Errores de facturación</option><option>Fallas tecnológicas</option><option>Interrupciones operativas</option><option>Pérdidas económicas</option></select>
   <label>Prioridad</label>
-  <div class="opts"><label><input type="radio" name="pr" checked><span>Alta</span></label><label><input type="radio" name="pr"><span>Media</span></label><label><input type="radio" name="pr"><span>Baja</span></label></div>
+  <div class="opts"><label><input type="radio" name="pr" value="Alta" checked><span>Alta</span></label><label><input type="radio" name="pr" value="Media"><span>Media</span></label><label><input type="radio" name="pr" value="Baja"><span>Baja</span></label></div>
   <label>Acciones incluidas</label>
-  <div class="chk"><input type="checkbox" checked> Capacitar al personal responsable</div>
-  <div class="chk"><input type="checkbox" checked> Programar seguimiento mensual</div>
-  <div class="chk"><input type="checkbox"> Notificar a la gerencia</div>
+  <div class="chk"><input type="checkbox" id="a1" checked> Capacitar al personal responsable</div>
+  <div class="chk"><input type="checkbox" id="a2" checked> Programar seguimiento mensual</div>
+  <div class="chk"><input type="checkbox" id="a3"> Notificar a la gerencia</div>
+  <div class="ai" id="ai">
+   <h4>🤖 Asistente de IA <em>PLN · Naive Bayes</em></h4>
+   <div class="res" id="ai-res"></div>
+   <div id="ai-bars"></div>
+   <div class="why" id="ai-why"></div>
+   <button class="btn g" id="ai-apply" type="button">Aplicar prioridad sugerida</button>
+   <div class="nt" id="ai-note"></div>
+  </div>
   <button class="btn" id="sv">Guardar control</button>
   <button class="btn g" data-go="4">Ir a seguimiento</button>
   <div class="ok" id="ok"></div>
@@ -132,7 +151,7 @@ nav button.on{color:var(--ink)}nav button.on span{filter:none;opacity:1}
 
  <nav><button class="on" data-go="1"><span>🩺</span>Diagnóstico</button><button data-go="2"><span>⚠️</span>Incidentes</button><button data-go="3"><span>🛡️</span>Control</button><button data-go="4"><span>📈</span>Seguimiento</button></nav>
 </div></div>
-<p class="foot">Prototipo navegable · botones, menú, formulario y opciones interactivas</p>
+<p class="foot">Prototipo navegable · botones, menú, formulario, opciones interactivas y asistente de IA</p>
 
 <script>
 var T=[0,["PANTALLA 1 · DIAGNÓSTICO","¿Por qué fallan<br>nuestros controles?"],["PANTALLA 2 · INCIDENTES","Consecuencias<br>para la empresa"],["PANTALLA 3 · NUEVO CONTROL","Fortalecer<br>controles internos"],["PANTALLA 4 · SEGUIMIENTO","Prevención y<br>sostenibilidad"]];
@@ -151,8 +170,130 @@ document.querySelectorAll(".tabs button").forEach(function(b,i){b.addEventListen
 })});
 document.getElementById("sv").addEventListener("click",function(){
  var n=document.getElementById("nm").value.trim();
- document.getElementById("ok").textContent=n?"✓ Control “"+n+"” guardado":"Escribe un nombre para el control";
+ var pr=document.querySelector("input[name=pr]:checked").value;
+ document.getElementById("ok").textContent=n?"✓ Control “"+n+"” guardado · Prioridad "+pr:"Escribe un nombre para el control";
 });
+
+/* ===== Asistente de IA: sugiere la prioridad del control ===== */
+/* Asistente de IA de SafeOps: clasificador Naive Bayes multinomial (PLN) */
+var SafeAI = (function () {
+  var STOP = "de la el los las un una y o en por para con sin del al que se su es a lo no ej".split(" ");
+  var CLASSES = ["Alta", "Media", "Baja"];
+  var RISKS = ["facturacion", "tecnologicas", "interrupciones", "perdidas"];
+  // [texto del control, riesgo (0-3), [capacitar, seguimiento, notificar gerencia], prioridad]
+  var DATA = [
+    ["Revisión doble de facturas antes del envío",0,[1,1,1],"Alta"],
+    ["Bloqueo de cobros duplicados al cliente",0,[1,1,1],"Alta"],
+    ["Conciliación diaria de ingresos y cobros",0,[0,1,1],"Alta"],
+    ["Respaldo automático de la base de datos",1,[1,1,1],"Alta"],
+    ["Plan de recuperación ante caída del sistema",1,[1,1,1],"Alta"],
+    ["Monitoreo continuo del servidor de facturación",1,[0,1,1],"Alta"],
+    ["Alerta inmediata por fraude en pagos",3,[1,1,1],"Alta"],
+    ["Límite de gasto y aprobación de pagos grandes",3,[0,1,1],"Alta"],
+    ["Plan de contingencia por paro de la línea de producción",2,[1,1,1],"Alta"],
+    ["Protocolo de emergencia ante detención de procesos críticos",2,[1,0,1],"Alta"],
+    ["Auditoría urgente de cobros incorrectos",0,[1,1,1],"Alta"],
+    ["Corrección inmediata de errores en el sistema de ventas",1,[0,1,1],"Alta"],
+    ["Checklist de revisión de datos del cliente",0,[1,1,0],"Media"],
+    ["Capacitación sobre registro correcto de facturas",0,[1,1,0],"Media"],
+    ["Actualización mensual de los sistemas",1,[0,1,0],"Media"],
+    ["Pruebas periódicas de copias de seguridad",1,[1,1,0],"Media"],
+    ["Planificación semanal de turnos y tareas",2,[1,1,0],"Media"],
+    ["Calendario de mantenimiento de equipos",2,[0,1,0],"Media"],
+    ["Presupuesto mensual y control de costos",3,[1,1,0],"Media"],
+    ["Revisión trimestral de gastos no previstos",3,[0,1,0],"Media"],
+    ["Manual de procedimientos para el personal",2,[1,1,0],"Media"],
+    ["Revisión de contratos con proveedores",3,[1,1,0],"Media"],
+    ["Verificación de facturas por muestreo",0,[1,1,0],"Media"],
+    ["Inspección programada de la infraestructura tecnológica",1,[0,1,0],"Media"],
+    ["Recordatorio de cierre contable",0,[0,0,0],"Baja"],
+    ["Boletín informativo sobre buenas prácticas",0,[1,0,0],"Baja"],
+    ["Actualización de la documentación de usuarios",1,[0,0,0],"Baja"],
+    ["Revisión anual de licencias de software",1,[0,1,0],"Baja"],
+    ["Reporte informativo de tiempos de proceso",2,[0,0,0],"Baja"],
+    ["Charla de sensibilización sobre orden y planificación",2,[1,0,0],"Baja"],
+    ["Seguimiento anual de gastos menores",3,[0,0,0],"Baja"],
+    ["Revisión de papelería y formatos",3,[0,0,0],"Baja"],
+    ["Registro informativo de incidentes menores",2,[0,1,0],"Baja"],
+    ["Actualización del manual de estilo de facturas",0,[0,0,0],"Baja"],
+    ["Encuesta de satisfacción sobre el sistema",1,[0,0,0],"Baja"],
+    ["Archivo de comprobantes antiguos",3,[0,0,0],"Baja"]
+  ];
+
+  function norm(s) { return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  function stem(w) {
+    if (w.length > 5 && w.slice(-2) === "es") return w.slice(0, -2);
+    if (w.length > 3 && w.slice(-1) === "s") return w.slice(0, -1);
+    return w;
+  }
+  // Convierte el formulario en una "bolsa de características" (PLN + variables del formulario)
+  function features(text, risk, acts) {
+    var f = norm(text || "").split(/[^a-z0-9]+/).filter(function (w) { return w.length > 2 && STOP.indexOf(w) < 0; }).map(stem);
+    f.push("r_" + RISKS[risk]);
+    ["a_capacitar", "a_seguimiento", "a_gerencia"].forEach(function (n, i) { if (acts[i]) f.push(n); });
+    return f;
+  }
+  function train(rows) {
+    var m = { cnt: {}, tot: {}, docs: {}, vocab: {}, n: rows.length };
+    CLASSES.forEach(function (c) { m.cnt[c] = {}; m.tot[c] = 0; m.docs[c] = 0; });
+    rows.forEach(function (r) {
+      m.docs[r[3]]++;
+      features(r[0], r[1], r[2]).forEach(function (t) {
+        m.cnt[r[3]][t] = (m.cnt[r[3]][t] || 0) + 1; m.tot[r[3]]++; m.vocab[t] = 1;
+      });
+    });
+    m.V = Object.keys(m.vocab).length;
+    return m;
+  }
+  function logp(m, c, t) { return Math.log(((m.cnt[c][t] || 0) + 1) / (m.tot[c] + m.V)); } // suavizado de Laplace
+  function predict(m, text, risk, acts) {
+    var f = features(text, risk, acts), sc = {}, mx = -1e9;
+    CLASSES.forEach(function (c) {
+      var s = Math.log(m.docs[c] / m.n);
+      f.forEach(function (t) { s += logp(m, c, t); });
+      sc[c] = s; if (s > mx) mx = s;
+    });
+    var z = 0, p = {};
+    CLASSES.forEach(function (c) { p[c] = Math.exp(sc[c] - mx); z += p[c]; });
+    CLASSES.forEach(function (c) { p[c] /= z; });
+    var best = CLASSES.slice().sort(function (a, b) { return p[b] - p[a]; });
+    // Factores: qué características empujan más hacia la clase ganadora frente a la segunda
+    var why = f.map(function (t) { return [t, logp(m, best[0], t) - logp(m, best[1], t)]; })
+      .filter(function (x) { return x[1] > 0.15 && (m.vocab[x[0]]); })
+      .sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3).map(function (x) { return x[0]; });
+    return { label: best[0], conf: p[best[0]], probs: p, factors: why };
+  }
+  function loo() { // validación cruzada "dejar uno fuera"
+    var ok = 0;
+    DATA.forEach(function (r, i) {
+      var m = train(DATA.filter(function (_, j) { return j !== i; }));
+      if (predict(m, r[0], r[1], r[2].map(Boolean)).label === r[3]) ok++;
+    });
+    return ok / DATA.length;
+  }
+  var model = train(DATA);
+  return { model: model, predict: function (t, r, a) { return predict(model, t, r, a); }, loo: loo, size: DATA.length, classes: CLASSES };
+})();
+
+(function(){
+ var FRIENDLY={r_facturacion:"riesgo: facturación",r_tecnologicas:"riesgo: tecnológico",r_interrupciones:"riesgo: interrupciones",r_perdidas:"riesgo: pérdidas",a_capacitar:"incluye capacitación",a_seguimiento:"incluye seguimiento",a_gerencia:"notifica a la gerencia"};
+ var COLOR={Alta:"var(--coral)",Media:"var(--amber)",Baja:"var(--mint)"},last=null;
+ function run(){
+  var acts=[a1.checked,a2.checked,a3.checked];
+  last=SafeAI.predict(document.getElementById("nm").value,document.getElementById("rs").selectedIndex,acts);
+  document.getElementById("ai-res").innerHTML='Prioridad sugerida: <b style="color:'+COLOR[last.label]+'">'+last.label.toUpperCase()+'</b> · '+Math.round(last.conf*100)+'% de confianza';
+  document.getElementById("ai-bars").innerHTML=SafeAI.classes.map(function(c){var p=Math.round(last.probs[c]*100);return '<div class="bar"><span>'+c+'</span><div class="meter"><u style="width:'+p+'%;background:'+COLOR[c]+'"></u></div><span>'+p+'%</span></div>'}).join("");
+  document.getElementById("ai-why").innerHTML=last.factors.length?'Factores que influyeron: '+last.factors.map(function(f){return '<i>'+(FRIENDLY[f]||f)+'</i>'}).join(""):'Escribe el nombre del control para un análisis más preciso.';
+ }
+ document.getElementById("ai-apply").addEventListener("click",function(){
+  if(!last)return;
+  document.querySelector('input[name=pr][value="'+last.label+'"]').checked=true;
+  document.getElementById("ok").textContent="✓ Prioridad "+last.label+" aplicada según la IA";
+ });
+ ["nm","rs","a1","a2","a3"].forEach(function(id){var e=document.getElementById(id);e.addEventListener("input",run);e.addEventListener("change",run)});
+ document.getElementById("ai-note").textContent="Modelo entrenado en el navegador con "+SafeAI.size+" ejemplos simulados · exactitud en validación cruzada: "+Math.round(SafeAI.loo()*100)+"%. Es una sugerencia: la decisión final es del usuario.";
+ run();
+})();
 </script>
 </body>
 </html>
