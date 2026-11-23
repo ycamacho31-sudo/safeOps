@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SafeOps · Gestión de riesgos empresariales</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--ink:#0f2e2c;--mint:#2fbf8a;--coral:#f0624d;--amber:#f2b134;--sand:#f3f7f5;--mut:#5f7b77;--line:#dbe8e4}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e8f4f0;text-align:center;padding:28px 16px 36px;
+background:radial-gradient(circle at 15% 10%,#14504a 0,transparent 45%),radial-gradient(circle at 90% 90%,#1b3b5c 0,transparent 45%),#0a2220}
+.eyebrow{color:var(--mint);font-size:12px;letter-spacing:.14em;font-weight:700}
+h1{margin:6px 0 10px;font-size:32px;color:#fff;letter-spacing:-.5px}
+.intro{max-width:580px;margin:0 auto 22px;font-size:14px;line-height:1.55;color:#bcd3cd}
+.phone{width:340px;max-width:100%;margin:0 auto;background:#16403c;border-radius:40px;padding:9px;box-shadow:0 22px 50px rgba(0,0,0,.5),0 0 0 1px #2c6b63;text-align:left}
+.screen{background:var(--sand);border-radius:32px;height:620px;display:flex;flex-direction:column;overflow:hidden;color:#24413e;position:relative}
+.top{padding:18px 18px 8px;display:flex;justify-content:space-between;align-items:flex-start}
+.top small{font-size:10px;letter-spacing:.1em;color:var(--mut);font-weight:700}
+.top h2{margin:3px 0 0;font-size:22px;color:var(--ink);line-height:1.15}
+.pill{font-size:10px;font-weight:700;background:#d4f3e6;color:#12724f;border-radius:99px;padding:4px 9px;white-space:nowrap}
+.body{flex:1;overflow-y:auto;padding:6px 16px 16px;display:none}
+.body.on{display:block}
+.lead{font-size:12px;color:var(--mut);margin:0 0 12px;line-height:1.45}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.k{background:#fff;border-radius:16px;padding:12px;border:1px solid var(--line)}
+.k b{font-size:24px;display:block;color:var(--ink)}
+.k span{font-size:11px;color:var(--mut)}
+.k.h{border-top:4px solid var(--coral)}.k.m{border-top:4px solid var(--amber)}.k.l{border-top:4px solid var(--mint)}.k.n{border-top:4px solid #4a8fd9}
+.sec{font-size:12px;font-weight:700;color:var(--ink);margin:14px 0 8px}
+.cause{background:#fff;border-radius:14px;border:1px solid var(--line);padding:10px 12px;margin-bottom:8px}
+.cause div{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}
+.meter{height:7px;border-radius:7px;background:#e4eeea;overflow:hidden}.meter u{display:block;height:100%;border-radius:7px}
+.ev{display:flex;gap:10px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:11px;margin-bottom:9px;cursor:pointer}
+.ev .ic{flex:none;width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:17px}
+.ev b{font-size:13px;color:var(--ink);display:block}.ev p{margin:2px 0 0;font-size:11px;color:var(--mut);line-height:1.4}
+.tabs{display:flex;background:#e4eeea;border-radius:12px;padding:3px;margin-bottom:12px}
+.tabs button{flex:1;border:0;background:none;padding:7px 2px;font-size:11px;border-radius:9px;cursor:pointer;color:var(--mut);font-weight:600}
+.tabs button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+label{display:block;font-size:11px;font-weight:700;color:var(--ink);margin:12px 0 5px}
+input[type=text],select,textarea{width:100%;font:inherit;font-size:12px;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#24413e}
+.opts{display:flex;gap:6px}
+.opts label{flex:1;margin:0;font-weight:600;font-size:11px;text-align:center;border:1px solid var(--line);border-radius:10px;padding:8px 2px;background:#fff;cursor:pointer}
+.opts input{display:none}
+.opts input:checked+span{color:#fff}
+.opts label:has(input:checked){background:var(--ink);color:#fff;border-color:var(--ink)}
+.chk{display:flex;align-items:center;gap:8px;font-size:12px;margin:7px 0;font-weight:500}
+.btn{width:100%;margin-top:14px;border:0;border-radius:14px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;background:var(--mint);color:#06281f}
+.btn.g{background:#fff;border:1px solid var(--ink);color:var(--ink);margin-top:8px}
+.ok{font-size:12px;color:#12724f;margin-top:8px;min-height:16px;font-weight:600}
+.ring{display:flex;gap:10px}
+.ring .k{flex:1;text-align:center;padding:12px 6px}
+.r{width:56px;height:56px;border-radius:50%;margin:0 auto 6px;display:grid;place-items:center;font-size:13px;font-weight:700;color:var(--ink)}
+.r::before{content:"";position:absolute}
+.step{display:flex;gap:10px;font-size:12px;margin:0 0 12px}
+.step i{flex:none;width:22px;height:22px;border-radius:50%;background:var(--mint);color:#06281f;font-style:normal;font-weight:700;display:grid;place-items:center;font-size:11px}
+.step.p i{background:#e4eeea;color:var(--mut)}
+.step b{display:block;color:var(--ink)}.step span{color:var(--mut);font-size:11px}
+nav{display:flex;background:#fff;border-top:1px solid var(--line);padding:6px 6px 10px}
+nav button{flex:1;border:0;background:none;cursor:pointer;font-size:10px;color:var(--mut);padding:4px 0;font-weight:600}
+nav button span{display:block;font-size:18px;filter:grayscale(1);opacity:.6}
+nav button.on{color:var(--ink)}nav button.on span{filter:none;opacity:1}
+.foot{font-size:11px;color:#8fb0a8;margin-top:18px}
+</style>
+</head>
+<body>
+<div class="eyebrow">PROTOTIPO DE INTERFAZ · GESTIÓN DE RIESGOS</div>
+<h1>SafeOps</h1>
+<p class="intro">Sistema que ayuda a las empresas a identificar riesgos a tiempo, fortalecer sus controles internos, capacitar al personal y dar seguimiento a los procesos para prevenir pérdidas y mejorar su sostenibilidad. Usa el menú inferior o toca los elementos para navegar.</p>
+
+<div class="phone"><div class="screen">
+ <div class="top"><div><small id="lbl">PANTALLA 1 · DIAGNÓSTICO</small><h2 id="ttl">¿Por qué fallan<br>nuestros controles?</h2></div><span class="pill">● Activo</span></div>
+
+ <section class="body on" id="s1">
+  <p class="lead">Las deficiencias suelen nacer de tres causas. Identifícalas para actuar antes de que afecten a la organización.</p>
+  <div class="cause"><div><b>Falta de planificación</b><span>38%</span></div><div class="meter"><u style="width:38%;background:var(--amber)"></u></div></div>
+  <div class="cause"><div><b>Controles insuficientes</b><span>44%</span></div><div class="meter"><u style="width:44%;background:var(--coral)"></u></div></div>
+  <div class="cause"><div><b>Poca capacitación del personal</b><span>29%</span></div><div class="meter"><u style="width:29%;background:#4a8fd9"></u></div></div>
+  <div class="sec">Resumen de exposición</div>
+  <div class="grid">
+   <div class="k h"><b>Alta</b><span>Errores de facturación</span></div>
+   <div class="k m"><b>Media</b><span>Fallas tecnológicas</span></div>
+   <div class="k n"><b>Media</b><span>Interrupciones operativas</span></div>
+   <div class="k l"><b>Baja</b><span>Pérdidas económicas</span></div>
+  </div>
+  <button class="btn" data-go="3">+ Registrar nuevo control</button>
+ </section>
+
+ <section class="body" id="s2">
+  <div class="tabs"><button class="on">Inmediatas</button><button>A largo plazo</button></div>
+  <div id="evlist">
+   <div class="ev" data-go="3"><div class="ic" style="background:#fde3df">🧾</div><div><b>Errores de facturación</b><p>Cobros incorrectos por falta de revisión. Toca para crear un control.</p></div></div>
+   <div class="ev" data-go="3"><div class="ic" style="background:#dcebfb">💻</div><div><b>Fallas tecnológicas</b><p>Sistemas caídos sin plan de respaldo definido.</p></div></div>
+   <div class="ev" data-go="3"><div class="ic" style="background:#fbefd0">⚙️</div><div><b>Interrupciones operativas</b><p>Procesos detenidos por falta de planificación.</p></div></div>
+   <div class="ev" data-go="3"><div class="ic" style="background:#d8f3e8">💸</div><div><b>Pérdidas económicas</b><p>Costos no previstos derivados de los eventos anteriores.</p></div></div>
+  </div>
+ </section>
+
+ <section class="body" id="s3">
+  <p class="lead">Completa el formulario para fortalecer un control interno.</p>
+  <label for="nm">Nombre del control</label>
+  <input type="text" id="nm" placeholder="Ej. Revisión doble de facturas">
+  <label for="rs">Riesgo que previene</label>
+  <select id="rs"><option>Errores de facturación</option><option>Fallas tecnológicas</option><option>Interrupciones operativas</option><option>Pérdidas económicas</option></select>
+  <label>Prioridad</label>
+  <div class="opts"><label><input type="radio" name="pr" checked><span>Alta</span></label><label><input type="radio" name="pr"><span>Media</span></label><label><input type="radio" name="pr"><span>Baja</span></label></div>
+  <label>Acciones incluidas</label>
+  <div class="chk"><input type="checkbox" checked> Capacitar al personal responsable</div>
+  <div class="chk"><input type="checkbox" checked> Programar seguimiento mensual</div>
+  <div class="chk"><input type="checkbox"> Notificar a la gerencia</div>
+  <button class="btn" id="sv">Guardar control</button>
+  <button class="btn g" data-go="4">Ir a seguimiento</button>
+  <div class="ok" id="ok"></div>
+ </section>
+
+ <section class="body" id="s4">
+  <p class="lead">Mide si las medidas funcionan: menos pérdidas hoy, más confianza y productividad mañana.</p>
+  <div class="ring">
+   <div class="k"><div class="r" style="background:conic-gradient(var(--mint) 0 72%,#e4eeea 0)"><span style="background:#fff;border-radius:50%;width:42px;height:42px;display:grid;place-items:center">72%</span></div><span>Controles aplicados</span></div>
+   <div class="k"><div class="r" style="background:conic-gradient(var(--amber) 0 54%,#e4eeea 0)"><span style="background:#fff;border-radius:50%;width:42px;height:42px;display:grid;place-items:center">54%</span></div><span>Personal capacitado</span></div>
+  </div>
+  <div class="sec">Impacto a largo plazo</div>
+  <div class="cause"><div><b>Confianza de los clientes</b><span>↑</span></div><div class="meter"><u style="width:66%;background:var(--mint)"></u></div></div>
+  <div class="cause"><div><b>Productividad</b><span>↑</span></div><div class="meter"><u style="width:58%;background:#4a8fd9"></u></div></div>
+  <div class="cause"><div><b>Competitividad</b><span>↑</span></div><div class="meter"><u style="width:49%;background:var(--amber)"></u></div></div>
+  <div class="sec">Ruta de mejora</div>
+  <div class="step"><i>✓</i><div><b>Planificar</b><span>Mapa de riesgos definido</span></div></div>
+  <div class="step"><i>✓</i><div><b>Controlar</b><span>Controles internos reforzados</span></div></div>
+  <div class="step p"><i>3</i><div><b>Capacitar y dar seguimiento</b><span>En curso</span></div></div>
+ </section>
+
+ <nav><button class="on" data-go="1"><span>🩺</span>Diagnóstico</button><button data-go="2"><span>⚠️</span>Incidentes</button><button data-go="3"><span>🛡️</span>Control</button><button data-go="4"><span>📈</span>Seguimiento</button></nav>
+</div></div>
+<p class="foot">Prototipo navegable · botones, menú, formulario y opciones interactivas</p>
+
+<script>
+var T=[0,["PANTALLA 1 · DIAGNÓSTICO","¿Por qué fallan<br>nuestros controles?"],["PANTALLA 2 · INCIDENTES","Consecuencias<br>para la empresa"],["PANTALLA 3 · NUEVO CONTROL","Fortalecer<br>controles internos"],["PANTALLA 4 · SEGUIMIENTO","Prevención y<br>sostenibilidad"]];
+function go(n){
+ for(var i=1;i<=4;i++)document.getElementById("s"+i).classList.toggle("on",i==n);
+ document.querySelectorAll("nav button").forEach(function(b,i){b.classList.toggle("on",i+1==n)});
+ document.getElementById("lbl").textContent=T[n][0];document.getElementById("ttl").innerHTML=T[n][1];
+}
+document.querySelectorAll("[data-go]").forEach(function(e){e.addEventListener("click",function(){go(+e.dataset.go)})});
+var L={0:[["🧾","#fde3df","Errores de facturación","Cobros incorrectos por falta de revisión. Toca para crear un control."],["💻","#dcebfb","Fallas tecnológicas","Sistemas caídos sin plan de respaldo definido."],["⚙️","#fbefd0","Interrupciones operativas","Procesos detenidos por falta de planificación."],["💸","#d8f3e8","Pérdidas económicas","Costos no previstos derivados de los eventos anteriores."]],
+1:[["🤝","#d8f3e8","Menor confianza de clientes","Los errores repetidos deterioran la relación comercial."],["🏢","#dcebfb","Daño a la reputación","La imagen empresarial se resiente con el tiempo."],["📉","#fbefd0","Menor productividad","Se pierde tiempo corrigiendo en lugar de producir."],["🏁","#fde3df","Menor competitividad","La organización pierde posición frente a su sector."]]};
+document.querySelectorAll(".tabs button").forEach(function(b,i){b.addEventListener("click",function(){
+ document.querySelectorAll(".tabs button").forEach(function(x){x.classList.remove("on")});b.classList.add("on");
+ document.getElementById("evlist").innerHTML=L[i].map(function(r){return '<div class="ev"><div class="ic" style="background:'+r[1]+'">'+r[0]+'</div><div><b>'+r[2]+'</b><p>'+r[3]+'</p></div></div>'}).join("");
+ document.querySelectorAll("#evlist .ev").forEach(function(e){e.addEventListener("click",function(){go(3)})});
+})});
+document.getElementById("sv").addEventListener("click",function(){
+ var n=document.getElementById("nm").value.trim();
+ document.getElementById("ok").textContent=n?"✓ Control “"+n+"” guardado":"Escribe un nombre para el control";
+});
+</script>
+</body>
+</html>
